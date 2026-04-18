@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tic Tac Toe</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: linear-gradient(135deg, #8ea6c9, #c9a1b1);
+  color: #2f2f2f;
+}
+
+h1 {
+  margin-top: 20px;
+  color: #2f2f2f;
+}
+
+#game {
+  display: grid;
+  grid-template-columns: repeat(3, 110px);
+  gap: 8px;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.cell {
+  width: 110px;
+  height: 110px;
+  font-size: 2.5em;
+  background: #f4f1f3;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #444;
+  transition: 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.cell:hover {
+  background: #e8e3e7;
+  transform: scale(1.04);
+}
+
+.controls {
+  margin: 10px;
+}
+
+button, select {
+  padding: 10px;
+  margin: 5px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #b48ea3;
+  color: white;
+  transition: 0.2s;
+}
+
+button:hover, select:hover {
+  background: #9f7a8f;
+}
+
+#score {
+  font-size: 1.3em;
+  margin-top: 10px;
+  color: #2f2f2f;
+}
+
+/* OVERLAY */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(40, 40, 50, 0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 2em;
+  color: #fff;
+}
+
+#overlay button {
+  margin-top: 20px;
+  font-size: 0.5em;
+  background: #b48ea3;
+}
+
+#overlay button:hover {
+  background: #9f7a8f;
+}
+footer {
+  margin-top: 40px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+footer a {
+  text-decoration: none;
+  color: #2f2f2f;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+footer a:hover {
+  color: #9f7a8f;
+}
+
+#fxCanvas {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Game card and enhanced visuals */
+.game-card {
+  width: 420px;
+  margin: 26px auto;
+  background: rgba(255,255,255,0.95);
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  border-left: 6px solid rgba(180,142,163,0.9);
+}
+
+.subtle {
+  color: #5a4a5a;
+  font-size: 0.95em;
+  margin-top: -6px;
+  margin-bottom: 12px;
+}
+
+.player-btn.active {
+  background: #9f7a8f;
+  box-shadow: 0 4px 12px rgba(159,122,143,0.28);
+}
+
+.cell.x { color: #5a3b5f; }
+.cell.o { color: #2f6f74; }
+
+.cell.placed { transform: scale(0.96); opacity: 0; animation: pop 160ms ease forwards; }
+@keyframes pop { to { transform: scale(1); opacity: 1; } }
+
+.cell.win { box-shadow: 0 6px 22px rgba(121,85,140,0.28); transform: translateY(-4px); }
+
+</style>
+</head>
+
+<body>
+
+<h1>Tic Tac Toe</h1>
+
+<div class="game-card">
+  <div class="controls">
+    <label>Choose Symbol:</label>
+    <button class="player-btn" onclick="setPlayer('X')">X</button>
+    <button class="player-btn" onclick="setPlayer('O')">O</button>
+  </div>
+
+  <div class="controls subtle">
+    <label>Difficulty:</label>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </div>
+
+  <div id="game"></div>
+  <div id="score"></div>
+
+  <div style="margin-top:12px;">
+    <button onclick="restartGame()">Restart Match</button>
+  </div>
+
+  <!-- WIN OVERLAY -->
+  <div id="overlay">
+    <div id="resultText"></div>
+    <button onclick="nextRound()">Next Round</button>
+  </div>
+
+</div>
+
+  <canvas id="fxCanvas"></canvas>
+
+<script>
+let board = Array(9).fill("");
+let player = "X";
+let computer = "O";
+let gameOver = false;
+
+let playerScore = 0;
+let computerScore = 0;
+
+const gameDiv = document.getElementById("game");
+const scoreDiv = document.getElementById("score");
+const overlay = document.getElementById("overlay");
+const resultText = document.getElementById("resultText");
+
+function setPlayer(symbol) {
+  player = symbol;
+  computer = symbol === "X" ? "O" : "X";
+  // mark active player button
+  document.querySelectorAll('.player-btn').forEach(b => b.classList.toggle('active', b.innerText === symbol));
+  restartBoard();
+}
+
+function drawBoard() {
+  gameDiv.innerHTML = "";
+  board.forEach((cell, i) => {
+    const div = document.createElement("div");
+    div.className = "cell";
+    if (cell) {
+      div.classList.add(cell.toLowerCase());
+      div.classList.add('placed');
+    }
+    div.innerText = cell;
+    div.onclick = () => playerMove(i);
+    gameDiv.appendChild(div);
+  });
+}
+
+function playerMove(i) {
+  if (board[i] || gameOver) return;
+
+  board[i] = player;
+  drawBoard();
+
+  if (checkWinner(player)) {
+    playerScore++;
+    endRound("You Win 🎉");
+    return;
+  }
+
+  if (board.every(c => c)) {
+    endRound("It's a Tie 🤝");
+    return;
+  }
+
+  setTimeout(computerMove, 400);
+}
+
+function computerMove() {
+  let move;
+  const level = document.getElementById("difficulty").value;
+
+  if (level === "easy") {
+    move = randomMove();
+  } else if (level === "medium") {
+    move = Math.random() < 0.5 ? bestMove() : randomMove();
+  } else {
+    move = bestMove();
+  }
+
+  board[move] = computer;
+  drawBoard();
+
+  if (checkWinner(computer)) {
+    computerScore++;
+    endRound("You Lost 😢");
+    return;
+  }
+
+  if (board.every(c => c)) {
+    endRound("It's a Tie 🤝");
+  }
+}
+
+function winningCombo(p) {
+  const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  for (const combo of wins) {
+    if (combo.every(i => board[i] === p)) return combo;
+  }
+  return null;
+}
+
+function highlightCombo(combo) {
+  if (!combo) return;
+  const cells = document.querySelectorAll('#game .cell');
+  combo.forEach(i => {
+    if (cells[i]) cells[i].classList.add('win');
+  });
+}
+
+// --- Visual effects: confetti (win) and rain (loss) ---
+const fxCanvas = document.getElementById('fxCanvas');
+const fxCtx = fxCanvas && fxCanvas.getContext ? fxCanvas.getContext('2d') : null;
+function resizeFX(){ if(!fxCanvas) return; fxCanvas.width = window.innerWidth; fxCanvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeFX);
+resizeFX();
+let fxAnim = null, fxParticles = [];
+function stopFX(){ fxParticles = []; if(fxAnim){ cancelAnimationFrame(fxAnim); fxAnim = null; if(fxCtx) fxCtx.clearRect(0,0,fxCanvas.width, fxCanvas.height); } }
+
+function launchConfetti(duration = 2600){ if(!fxCtx) return; stopFX(); const w = fxCanvas.width, h = fxCanvas.height; const colors = ['#e67e22','#f1c40f','#e74c3c','#2ecc71','#3498db','#9b59b6']; fxParticles = [];
+  for(let i=0;i<90;i++){ fxParticles.push({x: Math.random()*w, y: -20 - Math.random()*h*0.2, vx: (Math.random()-0.5)*6, vy: 2+Math.random()*3, size: 6+Math.random()*10, color: colors[Math.floor(Math.random()*colors.length)], rot: Math.random()*360, vr: (Math.random()-0.5)*8}); }
+  const start = Date.now(); function loop(){ fxCtx.clearRect(0,0,w,h); for(const p of fxParticles){ p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.rot += p.vr; fxCtx.save(); fxCtx.translate(p.x,p.y); fxCtx.rotate(p.rot*Math.PI/180); fxCtx.fillStyle = p.color; fxCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6); fxCtx.restore(); }
+    fxParticles = fxParticles.filter(p=>p.y < h+50);
+    if(Date.now()-start < duration || fxParticles.length) fxAnim = requestAnimationFrame(loop); else stopFX(); }
+  loop();
+}
+
+function launchSadFaces(duration = 2600){
+  if(!fxCtx) return; stopFX();
+  const w = fxCanvas.width, h = fxCanvas.height;
+  fxParticles = [];
+  const emojis = ['😢','☹️'];
+  for(let i=0;i<160;i++){
+    fxParticles.push({
+      x: Math.random()*w,
+      y: -Math.random()*h,
+      vx: -0.6 + Math.random()*1.2,
+      vy: 2 + Math.random()*4,
+      size: 22 + Math.random()*28,
+      emoji: emojis[Math.floor(Math.random()*emojis.length)],
+      wobble: Math.random()*0.06
+    });
+  }
+  const start = Date.now();
+  function loop(){
+    fxCtx.clearRect(0,0,w,h);
+    for(const p of fxParticles){
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx += Math.sin(p.y * 0.01) * p.wobble;
+      fxCtx.font = `${p.size}px serif`;
+      fxCtx.textAlign = 'center';
+      fxCtx.fillText(p.emoji, p.x, p.y);
+    }
+    fxParticles = fxParticles.filter(p => p.y < h + 80);
+    if(Date.now() - start < duration || fxParticles.length) fxAnim = requestAnimationFrame(loop);
+    else stopFX();
+  }
+  loop();
+}
+
+function randomMove() {
+  let empty = board.map((v,i) => v === "" ? i : null).filter(v => v !== null);
+  return empty[Math.floor(Math.random() * empty.length)];
+}
+
+function bestMove() {
+  let bestScore = -Infinity;
+  let move;
+
+  for (let i = 0; i < 9; i++) {
+    if (board[i] === "") {
+      board[i] = computer;
+      let score = minimax(board, 0, false);
+      board[i] = "";
+      if (score > bestScore) {
+        bestScore = score;
+        move = i;
+      }
+    }
+  }
+  return move;
+}
+
+function minimax(board, depth, isMaximizing) {
+  if (checkWinner(computer)) return 10 - depth;
+  if (checkWinner(player)) return depth - 10;
+  if (board.every(c => c)) return 0;
+
+  if (isMaximizing) {
+    let best = -Infinity;
+    for (let i = 0; i < 9; i++) {
+      if (board[i] === "") {
+        board[i] = computer;
+        best = Math.max(best, minimax(board, depth + 1, false));
+        board[i] = "";
+      }
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (let i = 0; i < 9; i++) {
+      if (board[i] === "") {
+        board[i] = player;
+        best = Math.min(best, minimax(board, depth + 1, true));
+        board[i] = "";
+      }
+    }
+    return best;
+  }
+}
+
+function checkWinner(p) {
+  const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  return wins.some(combo => combo.every(i => board[i] === p));
+}
+
+function endRound(message) {
+  gameOver = true;
+  resultText.innerText = message;
+  updateScore();
+  // highlight winning cells if present
+  const pCombo = winningCombo(player);
+  const cCombo = winningCombo(computer);
+  highlightCombo(pCombo || cCombo);
+  if (pCombo) launchConfetti();
+  else if (cCombo) launchSadFaces();
+  overlay.style.display = "flex";
+
+  if (playerScore === 5 || computerScore === 5) {
+    resultText.innerText = playerScore === 5 ? "🏆 You Won the Match!" : "💀 Computer Won the Match!";
+  }
+}
+
+function nextRound() {
+  overlay.style.display = "none";
+
+  if (playerScore === 5 || computerScore === 5) {
+    restartGame();
+  } else {
+    restartBoard();
+  }
+}
+
+function updateScore() {
+  scoreDiv.innerText = `You: ${playerScore} | Computer: ${computerScore}`;
+}
+
+function restartBoard() {
+  board = Array(9).fill("");
+  gameOver = false;
+  drawBoard();
+}
+
+function restartGame() {
+  playerScore = 0;
+  computerScore = 0;
+  updateScore();
+  restartBoard();
+  overlay.style.display = "none";
+}
+
+drawBoard();
+updateScore();
+// ensure correct active player button on load
+document.querySelectorAll('.player-btn').forEach(b => b.classList.toggle('active', b.innerText === player));
+</script>
+
+<footer>
+  <a href="index.html">← Back to Home page</a>
+</footer>
+
+</body>
+</html>

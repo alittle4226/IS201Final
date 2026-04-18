@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorite Music</title>
+    <link rel="stylesheet" href="css/fromScratch.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <h1>Favorite Music</h1>
+
+    <!-- NAV BAR -->
+    <div class="nav-bar">
+        <a href="index.html">Home</a>
+        <a href="fromScratch.html">Favorite Music</a>
+        <a href="AIapp.html">Tic Tac Toe Game</a>
+    </div>
+
+    <!-- FAVORITE ARTISTS -->
+    <div class="artists">
+        <h2>Favorite Artists and Songs</h2>
+
+        <ol>
+            <li>Luke Combs
+                <ul>
+                    <li>Be By You</li>
+                    <li>Going, Going, Gone</li>
+                    <li>I Ain't A Cowboy</li>
+                </ul>
+            </li>
+
+            <li>Noah Kahan
+                <ul>
+                    <li>Pain is Cold Water</li>
+                    <li>Forever</li>
+                    <li>Come Over</li>
+                </ul>
+            </li>
+
+            <li>Rascal Flatts
+                <ul>
+                    <li>I Like The Sound Of That</li>
+                    <li>Back to Life</li>
+                    <li>Yours If You Want It</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <!-- FAVORITE SONG -->
+    <div class="song">
+        <h2>Favorite Song</h2>
+
+        <iframe width="560" height="315"
+            src="https://www.youtube.com/embed/mj4efhy6n0o"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <!-- ARTIST SPOTLIGHT -->
+    <div class="spotlight">
+        <h2>Artist Spotlight!</h2>
+        <h3>Luke Combs</h3>
+
+        <img src="assets/img/luke_combs.jpg" width="300">
+
+        <p>
+            Luke Combs is from North Carolina, born in Charlotte and raised in Asheville, where he moved when he was eight years old. As a teenager, he played football and sang in vocal groups. While attending college at Appalachian State -- the same school Eric Church went to years earlier -- Combs decided to put his studies on the back burner so he could concentrate on country music. Learning how to play guitar, he amassed a catalog of original songs as he played shows on a regular basis. When he was just shy of earning his degree, he dropped out of college. After gigging regularly in North Carolina, he headed to Nashville in 2014 to pursue a musical career.
+            <br>
+            Bio Credit: Spotify
+        </p>
+    </div>
+
+    <!-- SPOTIFY TABLEAU DASHBOARD -->
+    <div class="tableau">
+        <h2>Spotify Tableau Dashboard</h2>
+        <p>Interactive spotify dashboard - top 10 artists, albums, genres, and tracks.</p>
+
+        <div class='tableauPlaceholder' id='viz1776473236681' style='position: relative'><noscript><a href='#'><img alt='Overview ' src='https://public.tableau.com/static/images/Wh/WhatisPlayingonSpotify/Overview/1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='WhatisPlayingonSpotify/Overview' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https://public.tableau.com/static/images/Wh/WhatisPlayingonSpotify/Overview/1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-US' /></object></div>
+                <script type='text/javascript'>
+                    var divElement = document.getElementById('viz1776473236681');
+                    var vizElement = divElement.getElementsByTagName('object')[0];
+                    if ( divElement.offsetWidth > 800 ) { vizElement.style.width='1300px';vizElement.style.height='977px';} else if ( divElement.offsetWidth > 500 ) { vizElement.style.width='1300px';vizElement.style.height='977px';} else { vizElement.style.width='100%';vizElement.style.height='2477px';}                     var scriptElement = document.createElement('script');
+                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                    vizElement.parentNode.insertBefore(scriptElement, vizElement);
+                </script>
+
+</body>
+</html>
